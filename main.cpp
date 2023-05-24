@@ -22,7 +22,7 @@ int main() {
 //    cout << "----------------------------" << endl;
 //    auto decrypted = c.decrypt(ct, 123);
 //    cout << decrypted << endl;
-    uint8_t result[16];
+    uint8_t result[16] = {};
     MD5 hash;
     print_hash(result);
     return 0;

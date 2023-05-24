@@ -25,6 +25,11 @@ private:
     static UINT1 PADDING[64];
     static UINT4 K[64];
 
+    static UINT4 S1[4];
+    static UINT4 S2[4];
+    static UINT4 S3[4];
+    static UINT4 S4[4];
+
     /* F, G, H and I are basic MD5 functions.
      */
     UINT4 F(UINT4 x, UINT4 y, UINT4 z);
@@ -37,10 +42,10 @@ private:
     /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
      * Rotation is separate from addition to prevent recomputation.
      */
-    UINT4 FF(UINT4 a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
-    UINT4 GG(UINT4 a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
-    UINT4 HH(UINT4 a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
-    UINT4 II(UINT4 a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
+    void FF(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
+    void GG(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
+    void HH(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
+    void II(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
 
 public:
     MD5(void);
