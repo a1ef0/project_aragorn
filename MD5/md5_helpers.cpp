@@ -18,7 +18,7 @@ UINT1 MD5::PADDING[64] = {0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-UINT4 MD5::K[64] = {0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
+UINT4 MD5::T[64] = {0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
                        0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
                        0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
                        0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
@@ -56,25 +56,25 @@ UINT4 MD5::rotate_left(UINT4 x, UINT4 n) {
 }
 
 void MD5::FF(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 i) {
-    a += F(b,c,d) + x + K[i];
+    a += F(b,c,d) + x + T[i];
     a = rotate_left(a, S1[s]);
     a += b;
 }
 
 void MD5::GG(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 i) {
-    a += G(b,c,d) + x + K[i];
+    a += G(b,c,d) + x + T[i];
     a = rotate_left(a, S2[s]);
     a += b;
 }
 
 void MD5::HH(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 i) {
-    a += H(b,c,d) + x + K[i];
+    a += H(b,c,d) + x + T[i];
     a = rotate_left(a, S3[s]);
     a += b;
 }
 
 void MD5::II(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 i) {
-    a += I(b,c,d) + x + K[i];
+    a += I(b,c,d) + x + T[i];
     a = rotate_left(a, S4[s]);
     a += b;
 }

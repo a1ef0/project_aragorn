@@ -23,7 +23,7 @@ private:
     UINT1 digest[16]; // the result
 
     static UINT1 PADDING[64];
-    static UINT4 K[64];
+    static UINT4 T[64];
 
     static UINT4 S1[4];
     static UINT4 S2[4];
