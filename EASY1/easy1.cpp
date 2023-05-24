@@ -11,7 +11,7 @@
 using namespace std;
 
 void print_demuxed(std::vector<uint8_t>& demuxed) {
-    for_each(demuxed.begin(), demuxed.end(), [](uint8_t n){
+    for_each(demuxed.begin(), demuxed.end(), [](uint8_t n) {
         std::bitset<6> a(n);
         std::cout << a << '\t';
     });
