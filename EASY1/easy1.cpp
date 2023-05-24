@@ -8,20 +8,22 @@
 #include <iostream>
 #include <bitset>
 
-void print_demuxed(std::vector<long> demuxed) {
-    for_each(demuxed.begin(), demuxed.end(), [](int n){
+using namespace std;
+
+void print_demuxed(std::vector<uint8_t>& demuxed) {
+    for_each(demuxed.begin(), demuxed.end(), [](uint8_t n){
         std::bitset<6> a(n);
         std::cout << a << '\t';
     });
     std::cout << std::endl;
 }
 
-Easy1::Easy1(long rounds) {
+Easy1::Easy1(size_t rounds) {
     this->rounds = rounds;
 }
 
-long Easy1::sbox(long x, bool inv) {
-    std::vector<long> box;
+uint8_t Easy1::sbox(uint8_t x, bool inv) {
+    std::vector<uint8_t> box;
     if (inv) {
         box = SBOX_INV;
     } else {
@@ -31,23 +33,22 @@ long Easy1::sbox(long x, bool inv) {
     return box[x];
 }
 
-long Easy1::pbox(long x, bool inv) {
-    std::vector<long> box;
-
+size_t Easy1::pbox(size_t x, bool inv) {
+    std::vector<uint8_t> box;
     if (inv) {
-        std::vector<long> pbox_inv(PBOX_SIZE);
-        for (int i = 0; i < PBOX_SIZE; i++)
+        std::vector<uint8_t> pbox_inv(PBOX_SIZE);
+        for (size_t i = 0; i < PBOX_SIZE; i++)
             pbox_inv[PBOX[i]] = i;
         box = pbox_inv;
     } else {
         box = PBOX;
     }
 
-    long y = 0l;
+    size_t y = 0;
 
-    for (std::size_t i = 0; i < PBOX_SIZE; i++) {
-        if ((x & (1l << i)) != 0) {
-            y = y ^ (1l << box[i]);
+    for (size_t i = 0; i < PBOX_SIZE; i++) {
+        if ((x & (size_t(1) << i)) != 0) {
+            y = y ^ (size_t(1) << box[i]);
         }
     }
 
@@ -55,9 +56,9 @@ long Easy1::pbox(long x, bool inv) {
 }
 
 
-std::vector<long> Easy1::demux(long x) {
-    std::vector<long> y;
-    for (std::size_t i = 0; i < SUBKEY_SIZE; i++) {
+std::vector<uint8_t> Easy1::demux(size_t x) {
+    std::vector<uint8_t> y;
+    for (size_t i = 0; i < SUBKEY_SIZE; i++) {
         y.push_back((x >> (i * SUBKEY_SIZE)) & 0x3f);
     }
     std::reverse(y.begin(), y.end());
@@ -65,25 +66,25 @@ std::vector<long> Easy1::demux(long x) {
 }
 
 
-long Easy1::mux(const std::vector<long>& x) {
-    long y = 0;
-    for (long i = 0; i < SUBKEY_SIZE; i++) {
+size_t Easy1::mux(const std::vector<uint8_t>& x) {
+    size_t y = 0;
+    for (size_t i = 0; i < SUBKEY_SIZE; i++) {
         y = (y << SUBKEY_SIZE) ^ (x[i] & 0x3f);
     }
 
     return y;
 }
 
-std::vector<long> Easy1::mix(const long & key) {
+std::vector<uint8_t> Easy1::mix(const size_t& key) {
     auto demuxed_key = demux(key);
-    std::vector<long> result;
-    for (std::size_t i = 0; i < SUBKEY_SIZE; ++i) {
+    std::vector<uint8_t> result;
+    for (size_t i = 0; i < SUBKEY_SIZE; ++i) {
         result.push_back(state[i] ^ demuxed_key[i]);
     }
     return result;
 }
 
-long Easy1::round(const long & key) {
+size_t Easy1::round(const size_t& key) {
     for (auto& e : state) {
         e = sbox(e, false);
     }
@@ -95,7 +96,7 @@ long Easy1::round(const long & key) {
     return mux(state);
 }
 
-long Easy1::unround(const long& key) {
+size_t Easy1::unround(const size_t& key) {
     state = mix(key);
 
     state = demux(pbox(mux(state), true));
@@ -107,22 +108,22 @@ long Easy1::unround(const long& key) {
     return mux(state);
 }
 
-long Easy1::encrypt(const long& pt, const long& key) {
+size_t Easy1::encrypt(const size_t& pt, const size_t& key) {
     state = demux(pt);
 
-    long result = 0l;
-    for (std::size_t i = 0; i < rounds; i++) {
+    size_t result = 0l;
+    for (size_t i = 0; i < rounds; i++) {
         result = round(key);
     }
 
     return result;
 }
 
-long Easy1::decrypt(const long& ct, const long& key) {
+size_t Easy1::decrypt(const size_t& ct, const size_t& key) {
     state = demux(ct);
 
-    long result = 0l;
-    for (std::size_t i = 0; i < rounds; i++) {
+    size_t result = 0l;
+    for (size_t i = 0; i < rounds; i++) {
         result = unround(key);
     }
 
