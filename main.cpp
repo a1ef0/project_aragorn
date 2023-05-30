@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <bitset>
 
+#include <unordered_map>
+
 //#include "easy1.h"
 #include "md5.h"
 
@@ -15,14 +17,25 @@ void print_hash(uint8_t *p){
 }
 
 int main() {
-//    Easy1 c(12123);
-//    long pt = 12312331;
-//    cout << pt << endl;
-//    auto ct = c.encrypt(pt, 123);
-//    cout << "----------------------------" << endl;
-//    auto decrypted = c.decrypt(ct, 123);
-//    cout << decrypted << endl;
-    uint8_t result[16] = {};
     md5 hash;
+
+    unordered_map<int, pair<int, int>> map;
+
+    int c = 0;
+    for (int i = 0; i < 10'000'000; i++) {
+        char buffer[33];
+        uint32_t result = hash.digest(to_string(i));
+        if (c < 10) {
+            if (map[result].first != 0) {
+                cout << "collision found!!" << endl;
+                cout << map[result].second << ' ' << result << endl;
+                c++;
+            }
+        } else {
+            break;
+        }
+        map[result] = {map[result].first + 1, i};
+    }
+
     return 0;
 }
