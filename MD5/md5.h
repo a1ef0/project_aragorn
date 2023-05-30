@@ -1,58 +1,55 @@
-/*
- * Derived from the RSA Data Security, Inc. MD5 Message-Digest Algorithm.
- * RFC 1321 ( https://www.rfc-editor.org/rfc/rfc1321 )
-*/
-
 #ifndef MD5_H
 #define MD5_H
 
-#include <bits/types/FILE.h>
-#include <cstddef>
-#include <cstdint>
-#include <string>
+/* MD5.H - header file for MD5C.C
+ */
 
+/* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
+rights reserved.
+
+License to copy and use this software is granted provided that it
+is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+Algorithm" in all material mentioning or referencing this software
+or this function.
+
+License is also granted to make and use derivative works provided
+that such works are identified as "derived from the RSA Data
+Security, Inc. MD5 Message-Digest Algorithm" in all material
+mentioning or referencing the derived work.
+
+RSA Data Security, Inc. makes no representations concerning either
+the merchantability of this software or the suitability of this
+software for any particular purpose. It is provided "as is"
+without express or implied warranty of any kind.
+These notices must be retained in any copies of any part of this
+documentation and/or software.
+ */
+#include <inttypes.h>
+
+/* POINTER defines a generic pointer type */
+typedef unsigned char *POINTER;
+
+/* UINT2 defines a two byte word */
+typedef uint16_t  UINT2;
+
+/* UINT4 defines a four byte word */
 typedef uint32_t UINT4;
-typedef uint16_t UINT2;
-typedef uint8_t  UINT1;
 
-class MD5 {
-private:
-    UINT4 buffer[64]; // bytes that didn't fit in last 64 byte chunk
-    UINT4 count[2];   // 64bit counter for number of bits (lo, hi)
-    UINT4 state[4];   // digest so far
-    UINT1 digest[16]; // the result
 
-    static UINT1 PADDING[64];
-    static UINT4 T[64];
-
-    static UINT4 S1[4];
-    static UINT4 S2[4];
-    static UINT4 S3[4];
-    static UINT4 S4[4];
-
-    /* F, G, H and I are basic MD5 functions.
-     */
-    UINT4 F(UINT4 x, UINT4 y, UINT4 z);
-    UINT4 G(UINT4 x, UINT4 y, UINT4 z);
-    UINT4 H(UINT4 x, UINT4 y, UINT4 z);
-    UINT4 I(UINT4 x, UINT4 y, UINT4 z);
-
-    UINT4 rotate_left(UINT4 x, UINT4 n);
-
-    /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
-     * Rotation is separate from addition to prevent recomputation.
-     */
-    void FF(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
-    void GG(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
-    void HH(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
-    void II(UINT4& a, UINT4 b, UINT4 c, UINT4 d, UINT4 x, UINT4 s, UINT4 ac);
+class md5 {
 
 public:
-    MD5(void);
-    void update(uint8_t *input, size_t input_len);
-    void finalize(void);
-    void step(UINT4 *buffer, UINT4 *input);
-    std::string hexdigest(char *input);
-};
+typedef struct {
+    UINT4 state[4];                                   /* state (ABCD) */
+    UINT4 count[2];        /* number of bits, modulo 2^64 (lsb first) */
+    unsigned char buffer[64];                         /* input buffer */
+} MD5_CTX;
 
+md5();
+void MD5Init(MD5_CTX *);
+void MD5Update(MD5_CTX *, unsigned char *, unsigned int);
+void MD5Final(unsigned char [16], MD5_CTX *);
+void MDString(char* string);
+
+};
 #endif // MD5_H
