@@ -4,19 +4,13 @@
 
 #include <unordered_map>
 
-//#include "easy1.h"
+#include "easy1.h"
 #include "md5.h"
+#include "des.h"
 
 using namespace std;
 
-void print_hash(uint8_t *p){
-    for(unsigned int i = 0; i < 16; ++i){
-        printf("%02x", p[i]);
-    }
-    printf("\n");
-}
-
-int main() {
+void find_collisions() {
     md5 hash;
 
     unordered_map<int, pair<int, int>> map;
@@ -36,6 +30,10 @@ int main() {
         }
         map[result] = {map[result].first + 1, i};
     }
+}
 
+int main() {
+    std::vector<uint8_t> key = {0x13, 0x34, 0x57, 0x79, 0x9b, 0xbc, 0xdf, 0xf1};
+    des des(key);
     return 0;
 }
