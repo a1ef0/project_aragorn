@@ -8,16 +8,25 @@ class des {
 private:
     std::vector<uint8_t> master_key;
     std::vector<std::vector<uint8_t>> round_keys;
-    std::vector<uint8_t> operate(int mode);
-    std::vector<uint8_t> xor_arrays(const std::vector<uint8_t> & first,
-                                    const std::vector<uint8_t> & second);
 
-    std::vector<uint8_t> permute(const std::vector<uint8_t> & block,
-                              const std::vector<uint8_t> & permutation_table);
+private:
+    std::vector<uint8_t> operate(int, std::vector<uint8_t>);
+    std::vector<uint8_t> xor_arrays(const std::vector<uint8_t> & ,
+                                    const std::vector<uint8_t> & );
+
+    std::vector<uint8_t> permute(const std::vector<uint8_t> &,
+                              const std::vector<uint8_t> &);
+
+    std::vector<uint8_t> pad(std::vector<uint8_t>);
+    std::vector<uint8_t> unpad(std::vector<uint8_t>);
+
+    std::vector<std::vector<uint8_t>> split_msg(const std::vector<uint8_t> &);
+    std::vector<uint8_t> concat_blocks(const std::vector<std::vector<uint8_t>> &);
+
 public:
-    des(const std::vector<uint8_t>& key);
-    std::vector<uint8_t> encrypt(std::vector<uint8_t> message);
-    std::vector<uint8_t> decrypt(std::vector<uint8_t> message);
+    des(const std::vector<uint8_t> &);
+    std::vector<uint8_t> encrypt(const std::vector<uint8_t> &);
+    std::vector<uint8_t> decrypt(const std::vector<uint8_t> &);
 };
 
 #endif // DES_H

@@ -33,7 +33,18 @@ void find_collisions() {
 }
 
 int main() {
-    std::vector<uint8_t> key = {0x13, 0x34, 0x57, 0x79, 0x9b, 0xbc, 0xdf, 0xf1};
-    des des(key);
+//    std::vector<uint8_t> key = {0x13, 0x34, 0x57, 0x79, 0x9b, 0xbc, 0xdf, 0xf1};
+//    des des(key);
+    auto print = [](auto const remark, auto const& v)
+    {
+        std::cout << remark << ": ";
+        for (auto n : v)
+            std::cout << int(n) << ' ';
+        std::cout << '\n';
+    };
+    std::vector<uint8_t> master_key(10);
+    std::vector<uint8_t> key = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::copy(key.begin(), key.begin() + 8, master_key.begin());
+    print("copied result", master_key);
     return 0;
 }
