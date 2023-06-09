@@ -23,6 +23,8 @@ private:
     std::vector<std::vector<uint8_t>> split_msg(const std::vector<uint8_t> &);
     std::vector<uint8_t> concat_blocks(const std::vector<std::vector<uint8_t>> &);
 
+    std::vector<uint8_t> sbox(const std::vector<uint8_t> & block);
+
 public:
     des(const std::vector<uint8_t> &);
     std::vector<uint8_t> encrypt(const std::vector<uint8_t> &);
