@@ -15,7 +15,8 @@ private:
                                     const std::vector<uint8_t> & );
 
     std::vector<uint8_t> permute(const std::vector<uint8_t> &,
-                              const std::vector<uint8_t> &);
+                              const std::vector<uint8_t> &,
+                              int);
 
     std::vector<uint8_t> pad(std::vector<uint8_t>);
     std::vector<uint8_t> unpad(std::vector<uint8_t>);
