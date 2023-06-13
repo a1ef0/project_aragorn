@@ -36,6 +36,11 @@ Thumbs.db
 *.pro.user*
 CMakeLists.txt.user*
 
+# Cmake generated Makefile, etc. containing sensitive information
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles/
 
 # Prerequisites
 *.d
