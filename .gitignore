@@ -31,6 +31,7 @@ Thumbs.db
 *.rc
 /.qmake.cache
 /.qmake.stash
+.idea/
 
 # qtcreator generated files
 *.pro.user*
@@ -74,3 +75,4 @@ CMakeFiles/
 *.exe
 *.out
 *.app
+/cmake-build-debug/
