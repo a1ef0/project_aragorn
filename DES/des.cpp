@@ -1,33 +1,12 @@
+#include <concepts>
+
 #include "des.h"
 
-#include <algorithm>
 #define DEBUG
 
 #ifdef DEBUG
 #include <iostream>
-
-namespace std {
-
-template <typename T>
-vector<T> operator +(const vector<T>& left, const vector<T>& right) {
-    vector<T> result;
-    result.reserve(left.size() + right.size());
-    result.insert(result.end(), left.begin(), left.end());
-    result.insert(result.end(), right.begin(), right.end());
-
-    return result;
-}
-
-template <typename T>
-vector<T> operator^(const vector<T>& left, const vector<T>& right) {
-    vector<T> result(left.size());
-    for (size_t i = 0; i < left.size(); i++) {
-        result[i] = left[i] ^ right[i];
-    }
-    return result;
-}
-
-}
+#include <bitset>
 
 auto print = [](auto const remark, auto const& v) {
     using namespace std;
@@ -36,6 +15,27 @@ auto print = [](auto const remark, auto const& v) {
         std::cout << int(n) << ' ';
     std::cout << '\n';
 };
+
+template<int T>
+void pprint(uint64_t num,
+            uint8_t chunk_len = T,
+            const std::string& remark = "") {
+
+    if (!remark.empty()) {
+        std::cout << remark << ": ";
+    }
+    std::bitset<T> x(num);
+    std::string res = x.to_string();
+    for (size_t i = 0; i < T; i++) {
+        if (i % chunk_len == 0 && i != 0) {
+            std::cout << ' ';
+        }
+        std::cout << res[i];
+    }
+    std::cout << '\n';
+};
+
+
 #endif
 
 std::vector<uint8_t> PC_1 =
@@ -147,165 +147,38 @@ std::vector<uint8_t> P =
      0x02, 0x08, 0x18, 0x0e, 0x20, 0x1b, 0x03, 0x09,
      0x13, 0x0d, 0x1e, 0x06, 0x16, 0x0b, 0x04, 0x19};
 
-std::vector<uint8_t> des::permute(const std::vector<uint8_t> & block,
-                          const std::vector<uint8_t> & permutation_table,
-                          int bits_per_element) {
-    std::vector<uint8_t> result(permutation_table.size() / bits_per_element);
-    for (size_t i = 0; i < permutation_table.size(); i++) {
-        // the bit idx we want to set 1
-        size_t idx = permutation_table[i] - 1;
-        result[i / bits_per_element] <<= 1;
-        if (block[idx / bits_per_element] &
-            (1 << (bits_per_element - permutation_table[i] % bits_per_element))) {
-            result[i / bits_per_element] = result[i / bits_per_element] | 1;
-        }
+template<typename T>
+requires (std::is_integral<T>::value)
+T des::permute(const T & block, uint8_t input_bit_count,
+               const std::vector<uint8_t> & box) {
+    T res = 0;
+    for (auto& idx : box) {
+        res <<= 1;
+        uint8_t pos = input_bit_count - idx;
+        uint8_t bit = (block & (1ll << pos)) >> pos;
+        res |= bit;
     }
-
-    return result;
-}
-
-std::vector<uint8_t> des::sbox(const std::vector<uint8_t> & block) {
-    std::vector<uint8_t> result(4);
-    for (size_t i = 0; i < 8; i++) {
-
-        uint8_t row = (block[i] & 1) + (block[i] & 0b100000 >> 5);
-        uint8_t col = (block[i] >> 1) & 0b1111;
-        uint8_t val = SBOX[i][row][col];
-
-        result[i / 2] <<= 4;
-        result[i / 2] |= val;
-    }
-
-    return result;
-}
-
-std::pair<std::vector<uint8_t>, std::vector<uint8_t>>
-half_split(const std::vector<uint8_t>& input) {
-    size_t result_len = input.size() / 2 + input.size() % 2;
-    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> result;
-    result.first = std::vector<uint8_t>(result_len);
-    result.second = std::vector<uint8_t>(result_len - input.size() % 2);
-    std::copy(input.begin(), input.begin() + result_len, result.first.begin());
-    std::copy(input.begin() + result_len, input.end(), result.second.begin());
-
-    return result;
-}
-
-des::des(const std::vector<uint8_t>& key) {
-    this->master_key = std::vector<uint8_t>(8);
-    if (key.size() < 8) {
-        throw std::runtime_error("key must be at least 8 bytes long");
-    } else {
-        std::copy(key.begin(), key.begin() + 8, master_key.begin());
-    }
-
-    std::vector<uint8_t> cur = permute(key, PC_1, 7);
-
-    std::vector<uint8_t> left, right;
-    auto tmp = half_split(cur);
-    left = tmp.first;
-    right = tmp.second;
-
-    this->round_keys =
-        std::vector<std::vector<uint8_t>>(16, std::vector<uint8_t>());
-
-    for (int i = 0; i < 16; ++i) {
-        std::rotate(left.begin(), left.begin() + SHIFT[i], left.end());
-        std::rotate(right.begin(), right.begin() + SHIFT[i], right.end());
-
-        auto tmp = left + right;
-        this->round_keys[i] = permute(tmp, PC_2, 8);
-    }
-}
-
-std::vector<uint8_t> des::pad(std::vector<uint8_t> msg) {
-    uint8_t padding_value = 8 - msg.size() % 8;
-    for (uint8_t i = 0; i < padding_value; i++) {
-        msg.push_back(padding_value);
-    }
-    return msg;
-}
-
-std::vector<uint8_t> des::unpad(std::vector<uint8_t> msg) {
-    uint8_t padding_value = msg[msg.size() - 1];
-    for (uint8_t i = 0; i < padding_value; i++) {
-        msg.pop_back();
-    }
-    return msg;
-}
-
-std::vector<std::vector<uint8_t>>
-des::split_msg(const std::vector<uint8_t> & msg) {
-    std::vector<std::vector<uint8_t>>
-        result(msg.size() / 8, std::vector<uint8_t>());
-    for (size_t i = 0; i < msg.size(); i++) {
-        result[i / 8].push_back(msg[i]);
-    }
-    return result;
-}
-
-std::vector<uint8_t>
-des::concat_blocks(const std::vector<std::vector<uint8_t>> & blocks) {
-    std::vector<uint8_t> result(blocks.size() * 8);
-    for (size_t i = 0; i < result.size(); i++) {
-        result[i] = blocks[i / 8][i % 8];
-    }
-    return result;
-}
-
-std::vector<uint8_t> des::operate(int mode, std::vector<uint8_t> message) {
-    // 0 - encrypt
-    // 1 - decrypt
-    if (mode == 0) {
-        message = pad(message);
-    } else if (mode == 1){
-        if (message.size() % 8 != 0) {
-            throw std::runtime_error("message length must be a multiple of 8 to"
-                                     "be decrypted");
-        }
-    } else {
-        return message;
-    }
-    if (mode == 0)
-        message = unpad(message);
-    print("msg", message);
-    std::vector<std::vector<uint8_t>> blocks = split_msg(message);
-    std::vector<std::vector<uint8_t>> result;
-    // for each 64-bit block of data
-    for (auto& block : blocks) {
-        block = permute(block, IP, 8);
-
-        auto tmp = half_split(block);
-        // both left and right are 32 bits
-        std::vector<uint8_t> left, right;
-        left = tmp.first;
-        right = tmp.second;
-        // 16 rounds of encryption
-        for (uint8_t i = 0; i < 16; i++) {
-            auto tmp = right;
-            // right expanded to 48 bits
-            right = permute(right, E);
-            right = right ^ this->round_keys[15 * mode - i * (mode > 0)
-                                             + i * (mode == 0)];
-            right = sbox(right);
-            right = permute(right, P);
-            right = right ^ left;
-            left = tmp;
-        }
-        result.push_back(permute(left + right, IP_1));
-    }
-    auto final_result = concat_blocks(result);
-    return final_result;
-}
-
-std::vector<uint8_t> des::encrypt(const std::vector<uint8_t> & message) {
-    std::vector<uint8_t> result = operate(0, message);
-    return result;
+    return res;
 }
 
 
-std::vector<uint8_t> des::decrypt(const std::vector<uint8_t> & message) {
-    std::vector<uint8_t> result = operate(1, message);
-//    result = unpad(result);
-    return result;
+inline uint32_t rotate_left(uint32_t n, uint32_t bits) {
+    return (n << bits) | (n >> (28 - bits));
+}
+
+des::des(const uint64_t key) {
+    this->master_key = key;
+    auto cur = permute<uint64_t>(master_key, 64, PC_1);
+
+    uint64_t left = cur >> 28;
+    uint64_t right = cur & ((1 << 28) - 1);
+
+    for (uint8_t i = 0; i < 16; i++) {
+        left = rotate_left(left, SHIFT[i]);
+        right = rotate_left(right, SHIFT[i]);
+        uint64_t concatenated = (left << 28) | right;
+
+        auto round_key = permute<uint64_t>(concatenated, 56, PC_2);
+        round_keys[i] = round_key;
+    }
 }
