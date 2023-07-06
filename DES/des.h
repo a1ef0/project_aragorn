@@ -16,9 +16,11 @@ private:
 
     std::vector<uint64_t> operate(uint8_t mode, uint64_t);
     uint64_t feistel(uint64_t, uint64_t);
+    void set_subkeys();
 
 public:
     des(const uint64_t);
+    des(const std::vector<uint8_t> &);
     std::vector<uint64_t> encrypt(const std::vector<uint64_t> &);
     std::vector<uint64_t> decrypt(const std::vector<uint64_t> &);
 };

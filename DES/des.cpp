@@ -166,9 +166,8 @@ inline uint32_t rotate_left(uint32_t n, uint32_t bits) {
     return (n << bits) & ((1 << 28) - 1) | (n >> (28 - bits));
 }
 
-// TODO: add constructor form bytes
-des::des(const uint64_t key) {
-    this->master_key = key;
+
+void des::set_subkeys() {
     auto cur = permute<uint64_t>(master_key, 64, PC_1);
 
     uint64_t left = cur >> 28;
@@ -183,6 +182,23 @@ des::des(const uint64_t key) {
         auto round_key = permute<uint64_t>(concatenated, 56, PC_2);
         round_keys[i] = round_key;
     }
+}
+
+des::des(const uint64_t key) {
+    this->master_key = key;
+    set_subkeys();
+}
+
+des::des(const std::vector<uint8_t> & key) {
+    if (key.size() != 8) {
+        throw std::runtime_error("Key size must be exactly 8 bytes");
+    }
+    this->master_key = 0;
+    for (uint8_t i = 0; i < 8; i++) {
+        this->master_key <<= 8;
+        this->master_key |= key[i];
+    }
+    set_subkeys();
 }
 
 uint64_t des::feistel(uint64_t block, uint64_t round_key) {
