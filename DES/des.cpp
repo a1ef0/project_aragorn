@@ -216,33 +216,82 @@ uint64_t des::feistel(uint64_t block, uint64_t round_key) {
     return result;
 }
 
-// TODO: add message preprocessing
-std::vector<uint64_t> des::operate(uint8_t mode,
-                                   uint64_t msg) {
+std::vector<uint8_t> des::pad(std::vector<uint8_t> msg) {
+    uint8_t padding_value = 8 - msg.size() % 8;
+    for (uint8_t i = 0; i < padding_value; i++) {
+        msg.push_back(padding_value);
+    }
+    return msg;
+}
+
+std::vector<uint8_t> des::unpad(std::vector<uint8_t> msg) {
+    uint8_t padding_value = msg[msg.size() - 1];
+    for (uint8_t i = 0; i < padding_value; i++) {
+        msg.pop_back();
+    }
+    return msg;
+}
+
+std::vector<uint64_t>
+des::preprocess_message(std::vector<uint8_t> msg) {
+    size_t chunks = msg.size() / 8;
+    std::vector<uint64_t> result(chunks);
+    for (int i = 0; i < chunks; i++) {
+        for (int j = 0; j < 8; j++) {
+            result[i] <<= 8;
+            result[i] |= msg[i * 8 + j];
+        }
+    }
+    return result;
+}
+
+std::vector<uint8_t> postprocess_message(const std::vector<uint64_t>& msg) {
+    std::vector<uint8_t> result(msg.size() * 8);
+    for (size_t i = 0; i < msg.size(); i++) {
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t tmp = (msg[i] >> 8 * (7 - j)) & 0xff;
+            result[8 * i + j] = tmp;
+        }
+    }
+    return result;
+}
+
+std::vector<uint8_t> des::operate(uint8_t mode, std::vector<uint8_t> msg) {
     // mode
     // 0 for encryption
     // 1 for decryption
-    auto permuted_msg = permute<uint64_t>(msg, 64, IP);
-    uint64_t left = permuted_msg >> 32;
-    uint64_t right = permuted_msg & ((1ll << 32) - 1);
-
-    for (uint8_t i = 0; i < 16; i++) {
-        uint64_t round_key = this->round_keys[15 * mode - i * (mode > 0) + i * (mode == 0)];
-        auto tmp = right;
-        right = left ^ feistel(right, round_key);
-        left = tmp;
+    if (mode == 0) {
+        msg = pad(msg);
     }
-    uint64_t concatenated = (right << 32) | left;
-    auto ct = permute<uint64_t>(concatenated, 64, IP_1);
-    return {ct};
+    std::vector<uint64_t> preprocessed = preprocess_message(msg);
+    std::vector<uint64_t> result;
+    for (auto& block : preprocessed) {
+        auto permuted_msg = permute<uint64_t>(block, 64, IP);
+        uint64_t left = permuted_msg >> 32;
+        uint64_t right = permuted_msg & ((1ll << 32) - 1);
+
+        for (uint8_t i = 0; i < 16; i++) {
+            uint64_t round_key = this->round_keys[15 * mode - i * (mode > 0) +
+                                                  i * (mode == 0)];
+            auto tmp = right;
+            right = left ^ feistel(right, round_key);
+            left = tmp;
+        }
+        uint64_t concatenated = (right << 32) | left;
+        auto ct = permute<uint64_t>(concatenated, 64, IP_1);
+        result.push_back(ct);
+    }
+    std::vector<uint8_t> postprocessed = postprocess_message(result);
+    if (mode == 1) {
+        return unpad(postprocessed);
+    }
+    return postprocessed;
 }
 
-std::vector<uint64_t> des::encrypt(const std::vector<uint64_t>& message) {
-    // TODO: remove this please
-    return operate(0, message[0]);
+std::vector<uint8_t> des::encrypt(const std::vector<uint8_t>& message) {
+    return operate(0, message);
 }
 
-std::vector<uint64_t> des::decrypt(const std::vector<uint64_t>& message) {
-    // TODO: remove this please
-    return operate(1, message[0]);
+std::vector<uint8_t> des::decrypt(const std::vector<uint8_t>& message) {
+    return operate(1, message);
 }
