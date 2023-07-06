@@ -27,6 +27,10 @@ documentation and/or software.
 #include <inttypes.h>
 #include <string>
 #include <vector>
+#include <bitset>
+#include <unordered_map>
+#include <iostream>
+
 /* POINTER defines a generic pointer type */
 typedef unsigned char *POINTER;
 
@@ -52,4 +56,30 @@ public:
     uint32_t digest(const std::string& string);
 
 };
+
+//void find_collisions() {
+//
+//    using namespace std;
+//
+//    md5 hash;
+//
+//    unordered_map<int, pair<int, int>> map;
+//
+//    int c = 0;
+//    for (int i = 0; i < 10'000'000; i++) {
+//        char buffer[33];
+//        uint32_t result = hash.digest(to_string(i));
+//        if (c < 10) {
+//            if (map[result].first != 0) {
+//                cout << "collision found!!" << endl;
+//                cout << map[result].second << ' ' << result << endl;
+//                c++;
+//            }
+//        } else {
+//            break;
+//        }
+//        map[result] = {map[result].first + 1, i};
+//    }
+//}
+
 #endif // MD5_H
