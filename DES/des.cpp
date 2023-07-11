@@ -245,7 +245,8 @@ des::preprocess_message(std::vector<uint8_t> msg) {
     return result;
 }
 
-std::vector<uint8_t> postprocess_message(const std::vector<uint64_t>& msg) {
+std::vector<uint8_t>
+des::postprocess_message(const std::vector<uint64_t>& msg) {
     std::vector<uint8_t> result(msg.size() * 8);
     for (size_t i = 0; i < msg.size(); i++) {
         for (uint8_t j = 0; j < 8; j++) {
