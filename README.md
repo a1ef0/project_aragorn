@@ -1,5 +1,4 @@
 # [project_aragorn](project_aragorn)
-## Demo-version of the cryptanalytic tool
 
 ### Disclaimer
 **This project contains several implementations of cryptographic algorithms.
