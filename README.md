@@ -1,4 +1,4 @@
-# [project_aragorn](project_aragorn)
+# [modern_cryptanalytic_techniques](modern_cryptanalytic_techniques)
 
 ### Disclaimer
 **This project contains several implementations of cryptographic algorithms.
